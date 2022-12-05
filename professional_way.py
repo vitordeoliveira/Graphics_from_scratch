@@ -1,3 +1,4 @@
+from asyncio import constants
 import pygame
 import numpy as np
 from math import *
@@ -17,11 +18,7 @@ angle = 1
 
 class Point:
     def __init__(self, points) -> None:
-        self.x = points[0]
-        self.y = points[1]
-        self.z = points[2]
-        self.w = 1
-        self.matrix = np.matrix([[self.x], [self.y], [self.z], [1.]])
+        self.matrix = np.matrix([[points[0]], [points[1]], [points[2]], [1.]])
 
 class Triangule:
     def __init__(self, a:Point, b:Point, c:Point) -> None:
@@ -35,59 +32,10 @@ class Mesh:
     def add(self, a, b, c):
         self.tris.append(Triangule(Point(a), Point(b), Point(c)))
 
-meshCube = Mesh()
-
-# all the cube vertices
-# // SOUTH
-meshCube.add((0.0, 0.0, 0.0), (0.0, 1.0, 0.0) , (1.0, 1.0, 0.0))    
-
-# meshCube.add(0.0, 0.0, 0.0)    
-# meshCube.add(1.0, 1.0, 0.0)    
-# meshCube.add(1.0, 0.0, 0.0)
-
-# // EAST                                                      
-# meshCube.add(1.0, 0.0, 0.0)    
-# meshCube.add(1.0, 1.0, 0.0)    
-# meshCube.add(1.0, 1.0, 1.0)
-# meshCube.add(1.0, 0.0, 0.0)    
-# meshCube.add(1.0, 1.0, 1.0)    
-# meshCube.add(1.0, 0.0, 1.0)
-
-# // NORTH                                                     
-# meshCube.add(1.0, 0.0, 1.0)    
-# meshCube.add(1.0, 1.0, 1.0)    
-# meshCube.add(0.0, 1.0, 1.0)
-# meshCube.add(1.0, 0.0, 1.0)    
-# meshCube.add(0.0, 1.0, 1.0)    
-# meshCube.add(0.0, 0.0, 1.0)
-
-# // WEST                                                      
-# meshCube.add(0.0, 0.0, 1.0)    
-# meshCube.add(0.0, 1.0, 1.0)    
-# meshCube.add(0.0, 1.0, 0.0)
-# meshCube.add(0.0, 0.0, 1.0)    
-# meshCube.add(0.0, 1.0, 0.0)    
-# meshCube.add(0.0, 0.0, 0.0)
-
-# // TOP                                                       
-# meshCube.add(0.0, 1.0, 0.0)    
-# meshCube.add(0.0, 1.0, 1.0)    
-# meshCube.add(1.0, 1.0, 1.0)
-# meshCube.add(0.0, 1.0, 0.0)    
-# meshCube.add(1.0, 1.0, 1.0)    
-# meshCube.add(1.0, 1.0, 0.0)
-
-# // BOTTOM                                                    
-# meshCube.add(1.0, 0.0, 1.0)    
-# meshCube.add(0.0, 0.0, 1.0)    
-# meshCube.add(0.0, 0.0, 0.0)
-# meshCube.add(1.0, 0.0, 1.0)    
-# meshCube.add(0.0, 0.0, 0.0)    
-# meshCube.add(1.0, 0.0, 0.0)
-
 
 a = HEIGHT/WIDTH
-f = 1/(tan(90/2))
+angleOfView=90
+f = 1/(tan(angleOfView/2))
 zfar = 1000.
 znear = 1.
 l = (zfar/( zfar - znear))
@@ -119,6 +67,35 @@ def perspective(matrix, vec):
         result[2] /= w
 
     return result
+
+
+
+meshCube = Mesh()
+
+# all the cube vertices
+# // SOUTH
+meshCube.add((0.0, 0.0, 0.0), (0.0, 1.0, 0.0) , (1.0, 1.0, 0.0))    
+meshCube.add((0.0, 0.0, 0.0), (1.0, 1.0, 0.0) , (1.0, 0.0, 0.0))    
+
+# // EAST                                                      
+meshCube.add((1.0, 0.0, 0.0),(1.0, 1.0, 0.0),(1.0, 1.0, 1.0))
+meshCube.add((1.0, 0.0, 0.0) ,(1.0, 1.0, 1.0) ,(1.0, 0.0, 1.0))
+
+# // NORTH                                                     
+meshCube.add((1.0, 0.0, 1.0),(1.0, 1.0, 1.0),(0.0, 1.0, 1.0))
+meshCube.add((1.0, 0.0, 1.0),(0.0, 1.0, 1.0),(0.0, 0.0, 1.0))
+
+# // WEST                                                      
+meshCube.add((0.0, 0.0, 1.0),(0.0, 1.0, 1.0),(0.0, 1.0, 0.0))
+meshCube.add((0.0, 0.0, 1.0),(0.0, 1.0, 0.0),(0.0, 0.0, 0.0))
+
+# // TOP                                                       
+meshCube.add((0.0, 1.0, 0.0),(0.0, 1.0, 1.0),(1.0, 1.0, 1.0))
+meshCube.add((0.0, 1.0, 0.0),(1.0, 1.0, 1.0),(1.0, 1.0, 0.0))
+
+# // BOTTOM                                                    
+meshCube.add((1.0, 0.0, 1.0),(0.0, 0.0, 1.0),(0.0, 0.0, 0.0))
+meshCube.add((1.0, 0.0, 1.0),(0.0, 0.0, 0.0),(1.0, 0.0, 0.0))
 
 
 clock = pygame.time.Clock()
@@ -164,25 +141,37 @@ while True:
     i = 0
     for tri in meshCube.tris:
         # rotated2d = tri
-        # rotated2da = np.dot(rotation_x, tri.a)
-        # rotated2db = np.dot(rotation_x, tri.b)
-        # rotated2dc = np.dot(rotation_x, tri.c)
+        rotatedXA = np.dot(rotation_x, tri.a.matrix)
+        rotatedXB = np.dot(rotation_x, tri.b.matrix)
+        rotatedXC = np.dot(rotation_x, tri.c.matrix)
+
+        rotatedXZA = np.dot(rotation_z, rotatedXA)
+        rotatedXZB = np.dot(rotation_z, rotatedXB)
+        rotatedXZC = np.dot(rotation_z, rotatedXC)
 
 
         # # rotated2d = np.dot(rotation_z, rotated2d)
-        # projected2d = perspective(projection_matrix, rotated2d.a)
-        # projected2d = perspective(projection_matrix, rotated2d.b)
-        # projected2d = perspective(projection_matrix, rotated2d.c)
+        projected2dA = perspective(projection_matrix, rotatedXZA)
+        projected2dB = perspective(projection_matrix, rotatedXZB)
+        projected2dC = perspective(projection_matrix, rotatedXZC)
 
 
-        # x = int((projected2d[0][0]) * scale) + circle_pos[0]
-        # y = int((projected2d[1][0]) * scale) + circle_pos[1]
+        xa = int((projected2dA[0][0]) * scale) + circle_pos[0]
+        ya = int((projected2dA[1][0]) * scale) + circle_pos[1]
+
+        xb = int((projected2dB[0][0]) * scale) + circle_pos[0]
+        yb = int((projected2dB[1][0]) * scale) + circle_pos[1]
+
+        xc = int((projected2dC[0][0]) * scale) + circle_pos[0]
+        yc = int((projected2dC[1][0]) * scale) + circle_pos[1]
 
         # projected_points[i] = [x, y]
 
-        # pygame.draw.circle(screen, RED, (x, y), 5)
+        pygame.draw.circle(screen, RED, (xa, ya), 2)
+        pygame.draw.circle(screen, RED, (xb, yb), 2)
+        pygame.draw.circle(screen, RED, (xc, yc), 2)
         
-        pygame.draw.polygon(screen,BLACK,[(0, 30), (30, 60), (60, 0)],True)
+        pygame.draw.polygon(screen,BLACK,[(xa,ya), (xb,yb), (xc,yc)],True)
         i += 1
 
     pygame.display.update()
